@@ -1,5 +1,13 @@
+function [resImage,houghImage, edgeCounter] = generateSTI(path, scale, direction)
+
 % load matrix from video file
-[video, frameNumber] = getMatrixFromVideo('video.mp4', 1/4);
+[video, frameNumber] = getMatrixFromVideo(path, scale);
+
+if(strcmp(direction,'row'))
+    video = permute(video, [2 1 3 4]);
+end    
+
+frameNumber = frameNumber - 4;
 height = size(video,1);
 width = size(video,2);
 
@@ -22,7 +30,6 @@ for col = 1 : width
 
     % replace the colour, RGB, by the chromaticity
     STI_chrom = zeros(height,frameNumber,2);
-    STI_colour_sum = (STI_colour(:,:,1)+STI_colour(:,:,2)+STI_colour(:,:,3));
     for i = 1:height
         for j = 1:frameNumber
             STI_colour_sum = STI_colour(i,j,1)+STI_colour(i,j,2)+STI_colour(i,j,3);
@@ -64,4 +71,4 @@ for col = 1 : width
 end
 
 % show result
-imshow(res);
+[resImage,houghImage, edgeCounter] = findEdge(res, 0.65);
