@@ -109,15 +109,15 @@ else
 end
 if(edgeCounter1 ~= 0 && edgeCounter2 == 0)
     resultStr = strcat(resultStr, ...
-        '        Conclusion: Video transition is more likely to be a horizontal wiping.');
+        '        Conclusion: Video transition is more likely to be a horizontal wipe.');
     set(handles.Result, 'String', resultStr);
 elseif(edgeCounter1 == 0 && edgeCounter2 ~= 0)
     resultStr = strcat(resultStr, ...
-        '        Conclusion: Video transition is more likely to be a vertical wiping.');
+        '        Conclusion: Video transition is more likely to be a vertical wipe.');
     set(handles.Result, 'String', resultStr); 
 else
      resultStr = strcat(resultStr, ...
-        '        Conclusion: Video transition might not be a wiping.');
+        '        Conclusion: Video transition might not be a wipe.');
     set(handles.Result, 'String', resultStr);    
 end
 
