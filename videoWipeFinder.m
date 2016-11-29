@@ -1,11 +1,11 @@
-function varargout = simpleTry(varargin)
+function varargout = videoWipeFinder(varargin)
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @simpleTry_OpeningFcn, ...
-                   'gui_OutputFcn',  @simpleTry_OutputFcn, ...
+                   'gui_OpeningFcn', @videoWipeFinder_OpeningFcn, ...
+                   'gui_OutputFcn',  @videoWipeFinder_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -19,36 +19,19 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-
-% --- Executes just before simpleTry is made visible.
-function simpleTry_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to simpleTry (see VARARGIN)
-
+% --- Executes just before videoWipeFinder is made visible.
+function videoWipeFinder_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.videoFileName = '';
 
-% Choose default command line output for simpleTry
+% Choose default command line output for videoWipeFinder
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
 set(handles.videoDisplay,'xtick',[],'ytick',[]);
 
-
-% UIWAIT makes simpleTry wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
 % --- Outputs from this function are returned to the command line.
-function varargout = simpleTry_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function varargout = videoWipeFinder_OutputFcn(hObject, eventdata, handles) 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
@@ -87,58 +70,56 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[STI1,STI1_hough, edgeCounter1] = generateSTI(handles.videoFileName, 1, 'column');
-image(STI1, 'Parent', handles.STI_column);
+
+scale = 1/8;
+% load matrix from video file
+[video, frameNumber] = getMatrixFromVideo(handles.videoFileName, scale);
+
+[STI1,STI1_hough,STI_colour1,edgeCounter1] = generateSTI(video, frameNumber, 'column');
+[STI2,STI2_hough,STI_colour2,edgeCounter2] = generateSTI(video, frameNumber, 'row');
+
+% Add image generate to GUI
+image(STI_colour1, 'Parent', handles.STI_column);
+image(STI1, 'Parent', handles.STI_intersection_column);
 image(STI1_hough, 'Parent', handles.STI_column_hough);
+image(STI_colour2, 'Parent', handles.STI_row);
+image(STI2, 'Parent', handles.STI_intersection_row);
+image(STI2_hough, 'Parent', handles.STI_row_hough);
+
+% Show result in editText box
 set(handles.Result, 'String', '');
 resultStr = get(handles.Result, 'String');
 if edgeCounter1 == 0
-    resultStr = strcat(resultStr, 'Find no edge in STI from column.');
+    resultStr = strcat(resultStr,sprintf('Find no edge in STI from column.\n'));
     set(handles.Result, 'String', resultStr);
 else
-    resultStr = strcat(resultStr, 'Find 1 edge in STI from column.      ');
+    resultStr = strcat(resultStr,sprintf('Find 1 edge in STI from column.\n'));
     set(handles.Result, 'String', resultStr);
 end
-
-[STI1,STI1_hough, edgeCounter2] = generateSTI(handles.videoFileName, 1, 'row');
-image(STI1, 'Parent', handles.STI_row);
-image(STI1_hough, 'Parent', handles.STI_row_hough);
 if edgeCounter2 == 0
-    resultStr = strcat(resultStr, 'Find no edge in STI from row.     ');
+    resultStr = strcat(resultStr,sprintf('  Find no edge in STI from row.\n'));
     set(handles.Result, 'String', resultStr);
 else
-    resultStr = strcat(resultStr, 'Find 1 edge in STI from row.      ');
+    resultStr = strcat(resultStr,sprintf('  Find 1 edge in STI from row.\n'));
     set(handles.Result, 'String', resultStr);
 end
-
 if(edgeCounter1 ~= 0 && edgeCounter2 == 0)
     resultStr = strcat(resultStr, ...
-        'Conclustion: Video transition is more likely to be a horizontal wiping');
+        '        Conclusion: Video transition is more likely to be a horizontal wiping.');
     set(handles.Result, 'String', resultStr);
 elseif(edgeCounter1 == 0 && edgeCounter2 ~= 0)
     resultStr = strcat(resultStr, ...
-        'Conclustion: Video transition is more likely to be a vertical wiping');
-    set(handles.Result, 'String', resultStr);   
+        '        Conclusion: Video transition is more likely to be a vertical wiping.');
+    set(handles.Result, 'String', resultStr); 
+else
+     resultStr = strcat(resultStr, ...
+        '        Conclusion: Video transition might not be a wiping.');
+    set(handles.Result, 'String', resultStr);    
 end
 
-
 function Result_Callback(hObject, eventdata, handles)
-% hObject    handle to Result (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of Result as text
-%        str2double(get(hObject,'String')) returns contents of Result as a double
-
-
-% --- Executes during object creation, after setting all properties.
 function Result_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to Result (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
