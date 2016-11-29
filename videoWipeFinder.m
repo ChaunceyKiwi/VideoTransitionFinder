@@ -71,12 +71,16 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+contents = cellstr(get(handles.chooseMethod,'String'));
+method = contents{get(handles.chooseMethod,'Value')};
 scale = 1/8;
 % load matrix from video file
 [video, frameNumber] = getMatrixFromVideo(handles.videoFileName, scale);
 
-[STI1,STI1_hough,STI_colour1,edgeCounter1] = generateSTI(video, frameNumber, 'column');
-[STI2,STI2_hough,STI_colour2,edgeCounter2] = generateSTI(video, frameNumber, 'row');
+[STI1,STI1_hough,STI_colour1,edgeCounter1] = generateSTI(video, ...
+    frameNumber, 'column', method);
+[STI2,STI2_hough,STI_colour2,edgeCounter2] = generateSTI(video, ...
+    frameNumber, 'row', method);
 
 % Add image generate to GUI
 image(STI_colour1, 'Parent', handles.STI_column);
@@ -120,6 +124,53 @@ end
 function Result_Callback(hObject, eventdata, handles)
 
 function Result_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu1.
+function popupmenu1_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu1
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in chooseMethod.
+function chooseMethod_Callback(hObject, eventdata, handles)
+% hObject    handle to chooseMethod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% Hints: contents = cellstr(get(hObject,'String')) returns chooseMethod contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from chooseMethod
+
+
+% --- Executes during object creation, after setting all properties.
+function chooseMethod_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to chooseMethod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
