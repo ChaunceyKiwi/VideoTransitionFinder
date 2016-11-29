@@ -1,7 +1,4 @@
-function [resImage,houghImage, edgeCounter] = generateSTI(path, scale, direction)
-
-% load matrix from video file
-[video, frameNumber] = getMatrixFromVideo(path, scale);
+function [resImage,houghImage, edgeCounter] = generateSTI(video, frameNumber, direction)
 
 if(strcmp(direction,'row'))
     video = permute(video, [2 1 3 4]);

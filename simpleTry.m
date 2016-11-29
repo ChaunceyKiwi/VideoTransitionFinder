@@ -87,7 +87,12 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[STI1,STI1_hough, edgeCounter1] = generateSTI(handles.videoFileName, 1, 'column');
+
+scale = 1/8;
+% load matrix from video file
+[video, frameNumber] = getMatrixFromVideo(handles.videoFileName, scale);
+
+[STI1,STI1_hough, edgeCounter1] = generateSTI(video, frameNumber, 'column');
 image(STI1, 'Parent', handles.STI_column);
 image(STI1_hough, 'Parent', handles.STI_column_hough);
 set(handles.Result, 'String', '');
@@ -100,7 +105,7 @@ else
     set(handles.Result, 'String', resultStr);
 end
 
-[STI1,STI1_hough, edgeCounter2] = generateSTI(handles.videoFileName, 1, 'row');
+[STI1,STI1_hough, edgeCounter2] = generateSTI(video, frameNumber, 'row');
 image(STI1, 'Parent', handles.STI_row);
 image(STI1_hough, 'Parent', handles.STI_row_hough);
 if edgeCounter2 == 0
@@ -113,11 +118,11 @@ end
 
 if(edgeCounter1 ~= 0 && edgeCounter2 == 0)
     resultStr = strcat(resultStr, ...
-        '    Conclustion: Video transition is more likely to be a horizontal wiping.');
+        '    Conclusion: Video transition is more likely to be a horizontal wiping.');
     set(handles.Result, 'String', resultStr);
 elseif(edgeCounter1 == 0 && edgeCounter2 ~= 0)
     resultStr = strcat(resultStr, ...
-        '    Conclustion: Video transition is more likely to be a vertical wiping.');
+        '    Conclusion: Video transition is more likely to be a vertical wiping.');
     set(handles.Result, 'String', resultStr);   
 end
 
